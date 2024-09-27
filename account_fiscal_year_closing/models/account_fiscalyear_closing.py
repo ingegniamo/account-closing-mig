@@ -33,24 +33,20 @@ class AccountFiscalyearClosing(models.Model):
         return self.env.company
 
     name = fields.Char(
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     check_draft_moves = fields.Boolean(
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     year = fields.Integer(
         help="Introduce here the year to close. If the fiscal year is between "
         "several natural years, you have to put here the last one.",
         default=lambda self: self._default_year(),
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     company_id = fields.Many2one(
         default=lambda self: self._default_company_id(),
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     chart_template= fields.Selection(
         string="Chart template",
@@ -74,34 +70,29 @@ class AccountFiscalyearClosing(models.Model):
     date_start = fields.Date(
         string="From date",
         required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     date_end = fields.Date(
         string="To date",
         required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     date_opening = fields.Date(
         string="Opening date",
         required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     closing_template_id = fields.Many2one(
         comodel_name="account.fiscalyear.closing.template",
         string="Closing template",
         domain="[('chart_template', '=', chart_template)]",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     move_config_ids = fields.One2many(
         comodel_name="account.fiscalyear.closing.config",
         inverse_name="fyc_id",
         string="Moves configuration",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=True
     )
     move_ids = fields.One2many(
         comodel_name="account.move",

@@ -24,6 +24,7 @@
                     string="Closing type"
                     name="closing_type"
                     domain="[]"
+                    readonly="state == 'posted'"
                     context="{'group_by': 'closing_type'}"
                 />
             </filter>
