@@ -28,7 +28,7 @@
                             <field name="check_draft_moves" />
                         </group>
                         <group>
-                            <field name="chart_template_ids" widget="many2many_tags" />
+                            <field name="chart_template" />
                             <field
                                 name="company_id"
                                 groups="base.group_multi_company"

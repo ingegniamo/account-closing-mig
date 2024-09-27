@@ -40,7 +40,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="chart_template_id" invisible="1" />
+                            <field name="chart_template" invisible="1" />
                             <label for="closing_template_id" />
                             <div>
                                 <field name="closing_template_id" class="oe_inline" />
