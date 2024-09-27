@@ -20,6 +20,8 @@ class AccountFiscalyearClosingTemplate(models.Model):
         selection='_chart_template_selection',
         string="Available for",
     )
+    def _chart_template_selection(self):
+        return self.env['account.chart.template']._select_chart_template()
 
 
 class AccountFiscalyearClosingConfigTemplate(models.Model):
