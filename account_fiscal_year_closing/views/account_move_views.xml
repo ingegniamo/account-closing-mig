@@ -9,7 +9,7 @@
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
             <field name="ref" position="after">
-                <field name="closing_type" />
+                <field name="closing_type" readonly="state == 'posted'" />
             </field>
         </field>
     </record>
@@ -24,7 +24,7 @@
                     string="Closing type"
                     name="closing_type"
                     domain="[]"
-                    readonly="state == 'posted'"
+                    
                     context="{'group_by': 'closing_type'}"
                 />
             </filter>
