@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!-- Copyright 2016 Antonio Espinosa <antonio.espinosa@tecnativa.com>
-     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
 <odoo>
 
     <record id="view_account_fiscalyear_closing_tree" model="ir.ui.view">
@@ -25,64 +22,17 @@
         <field name="arch" type="xml">
             <form string="Fiscal year closing">
                 <header>
-                    <button
-                        name="button_calculate"
-                        type="object"
-                        string="Calculate"
-                        class="oe_highlight"
-                        attrs="{'invisible': [('state', 'not in', ['draft'])]}"
-                    />
-                    <button
-                        name="button_recalculate"
-                        states="calculated"
-                        type="object"
-                        string="Recalculate"
-                    />
-                    <button
-                        name="button_post"
-                        type="object"
-                        string="Confirm and post moves"
-                        class="oe_highlight"
-                        attrs="{'invisible': ['|', ('move_config_ids', '=', []), ('state', 'not in', ['calculated'])]}"
-                    />
-                    <button
-                        name="button_recover"
-                        states="cancelled"
-                        type="object"
-                        string="Draft"
-                    />
-                    <button
-                        name="button_cancel"
-                        states="calculated,posted"
-                        type="object"
-                        string="Cancel"
-                        confirm="This will remove all the closing moves. Are you sure you want to continue?"
-                    />
-                    <field
-                        name="state"
-                        widget="statusbar"
-                        statusbar_visible="draft,calculated,posted,cancelled"
-                        statusbar_colors="{'cancelled': 'red', 'posted': 'blue'}"
-                    />
+                    <button name="button_calculate" type="object" string="Calculate" class="oe_highlight" invisible="state not in ['draft']" />
+                    <button name="button_recalculate" type="object" string="Recalculate" invisible="state not in ('calculated')" />
+                    <button name="button_post" type="object" string="Confirm and post moves" class="oe_highlight" invisible="(move_config_ids == [] or state not in ['calculated'])" />
+                    <button name="button_recover" type="object" string="Draft" invisible="state not in ('cancelled')" />
+                    <button name="button_cancel" type="object" string="Cancel" confirm="This will remove all the closing moves. Are you sure you want to continue?" invisible="state not in ('calculated','posted')" />
+                    <field name="state" widget="statusbar" statusbar_visible="draft,calculated,posted,cancelled" statusbar_colors="{'cancelled': 'red', 'posted': 'blue'}" />
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button
-                            class="oe_stat_button"
-                            name="button_open_moves"
-                            states="calculated,posted"
-                            type="object"
-                            string="Show moves"
-                            icon="fa-list"
-                        />
-                        <button
-                            class="oe_stat_button"
-                            name="button_open_move_lines"
-                            states="calculated,posted"
-                            type="object"
-                            string="Show move lines"
-                            icon="fa-list"
-                        />
+                        <button class="oe_stat_button" name="button_open_moves" type="object" string="Show moves" icon="fa-list" invisible="state not in ('calculated','posted')" />
+                        <button class="oe_stat_button" name="button_open_move_lines" type="object" string="Show move lines" icon="fa-list" invisible="state not in ('calculated','posted')" />
                     </div>
                     <div class="oe_title">
                         <label for="name" string="Fiscal closing" />
@@ -95,10 +45,7 @@
                             <div>
                                 <field name="closing_template_id" class="oe_inline" />
                             </div>
-                            <field
-                                name="company_id"
-                                groups="base.group_multi_company"
-                            />
+                            <field name="company_id" groups="base.group_multi_company" />
                         </group>
                         <group>
                             <field name="year" />
@@ -108,7 +55,7 @@
                             <field name="check_draft_moves" />
                         </group>
                     </group>
-                    <group attrs="{'invisible': [('calculation_date', '=', False)]}">
+                    <group invisible="calculation_date == False">
                         <group>
                             <field name="calculation_date" />
                         </group>
@@ -149,16 +96,10 @@
                                         <field name="dest_account_id" />
                                     </tree>
                                 </field>
-                                <group
-                                    name="accounts_closing_types"
-                                    string="Accounts closing types"
-                                >
+                                <group name="accounts_closing_types" string="Accounts closing types">
                                     <field name="closing_type_default" />
                                 </group>
-                                <label
-                                    for="closing_type_ids"
-                                    string="Accounts mapping"
-                                />
+                                <label for="closing_type_ids" string="Accounts mapping" />
                                 <field name="closing_type_ids" nolabel="1">
                                     <tree editable="bottom">
                                         <field name="account_type" />
@@ -180,28 +121,10 @@
             <search string="Fiscal year closing">
                 <field name="name" />
                 <filter string="Draft" name="draft" domain="[('state','=','draft')]" />
-                <filter
-                    string="In process"
-                    name="in_process"
-                    domain="[('state', '=', 'calculated')]"
-                />
-                <filter
-                    string="Posted"
-                    name="posted"
-                    domain="[('state', '=', 'posted')]"
-                />
-                <filter
-                    string="Cancelled"
-                    name="cancelled"
-                    domain="[('state', '=', 'cancelled')]"
-                />
-                <filter
-                    string="Company"
-                    name="company"
-                    domain="[]"
-                    context="{'group_by': 'company_id'}"
-                    groups="base.group_multi_company"
-                />
+                <filter string="In process" name="in_process" domain="[('state', '=', 'calculated')]" />
+                <filter string="Posted" name="posted" domain="[('state', '=', 'posted')]" />
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]" />
+                <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company" />
             </search>
         </field>
     </record>
@@ -214,12 +137,6 @@
         <field name="view_id" ref="view_account_fiscalyear_closing_tree" />
     </record>
 
-    <menuitem
-        id="menu_account_fiscalyear_closing"
-        parent="account.menu_finance_entries"
-        sequence="90"
-        name="Fiscal year closings"
-        action="action_account_fiscalyear_closing"
-    />
+    <menuitem id="menu_account_fiscalyear_closing" parent="account.menu_finance_entries" sequence="90" name="Fiscal year closings" action="action_account_fiscalyear_closing" />
 
 </odoo>
