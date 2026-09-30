@@ -394,3 +394,99 @@ class TestAccountFiscalYearClosing(AccountTestInvoicingCommon):
 
         posted = fy_closing.button_post()
         self.assertTrue(posted, "Fiscal Year closing is not posted!")
+
+    def test_account_closing_draft_cancelled_moves(self):
+        """Draft and cancelled moves are not closed,
+        even if the draft moves check is disabled."""
+        partner = self.env.ref("base.res_partner_4")
+        posted_invoice = self.create_simple_invoice(
+            self.the_day, partner, "out_invoice"
+        )
+        posted_invoice.action_post()
+        draft_invoice = self.create_simple_invoice(
+            self.the_day, partner, "out_invoice"
+        )
+        cancelled_invoice = self.create_simple_invoice(
+            self.the_day, partner, "out_invoice"
+        )
+        cancelled_invoice.action_post()
+        cancelled_invoice.button_draft()
+        cancelled_invoice.button_cancel()
+        self.assertEqual(draft_invoice.state, "draft")
+        self.assertEqual(cancelled_invoice.state, "cancel")
+        receivable = posted_invoice.line_ids.filtered(
+            lambda line: line.account_id.account_type == "asset_receivable"
+        ).account_id
+
+        fy_closing = self.env["account.fiscalyear.closing"].create(
+            {
+                "name": "Closing fy",
+                "date_start": self.start_of_this_year,
+                "date_end": self.end_of_this_year,
+                "date_opening": self.start_of_next_year,
+                "check_draft_moves": False,
+                "move_config_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "name": "Economic Accounts Closing",
+                            "journal_id": self.closing_journal.id,
+                            "code": "REV",
+                            "move_type": "loss_profit",
+                            "closing_type_default": "balance",
+                            "date": self.end_of_this_year,
+                            "sequence": 1,
+                            "mapping_ids": [
+                                (
+                                    0,
+                                    0,
+                                    {
+                                        "src_accounts": self.a_sale.code,
+                                        "dest_account_id": self.a_pf_closing.id,
+                                    },
+                                )
+                            ],
+                        },
+                    ),
+                    (
+                        0,
+                        0,
+                        {
+                            "name": "Receivable Closing",
+                            "journal_id": self.closing_journal.id,
+                            "code": "RCL",
+                            "move_type": "closing",
+                            "closing_type_default": "unreconciled",
+                            "date": self.end_of_this_year,
+                            "sequence": 2,
+                            "mapping_ids": [
+                                (
+                                    0,
+                                    0,
+                                    {
+                                        "src_accounts": receivable.code,
+                                        "dest_account_id": self.a_bal_closing.id,
+                                    },
+                                )
+                            ],
+                        },
+                    ),
+                ],
+            }
+        )
+        self.assertIs(fy_closing.button_calculate(), True)
+
+        closing_lines = fy_closing.move_ids.line_ids
+        sale_line = closing_lines.filtered(lambda line: line.account_id == self.a_sale)
+        posted_sale_balance = sum(
+            posted_invoice.line_ids.filtered(
+                lambda line: line.account_id == self.a_sale
+            ).mapped("balance")
+        )
+        self.assertAlmostEqual(sale_line.balance, -posted_sale_balance)
+        receivable_line = closing_lines.filtered(
+            lambda line: line.account_id == receivable
+        )
+        self.assertEqual(receivable_line.partner_id, partner)
+        self.assertAlmostEqual(receivable_line.balance, -posted_invoice.amount_total)

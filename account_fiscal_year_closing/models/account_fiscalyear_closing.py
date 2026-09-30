@@ -620,11 +620,23 @@ class AccountFiscalyearClosingMapping(models.Model):
             [
                 ("company_id", "=", company_id),
                 ("account_id", "=", account.id),
-                ("move_id.state", "!=", "cancel"),
                 ("date", ">=", start),
                 ("date", "<=", end),
             ]
+            + self._closing_move_state_domain()
         )
+
+    def _closing_move_state_domain(self):
+        """Posted moves, plus the (draft) moves of this closing.
+
+        Draft moves out of the closing must not be closed, even when the
+        draft moves check is disabled; cancelled moves never are.
+        """
+        return [
+            "|",
+            ("parent_state", "=", "posted"),
+            ("move_id.fyc_id", "=", self.fyc_config_id.fyc_id.id),
+        ]
 
     def move_line_partner_prepare(self, account, partner):
         self.ensure_one()
@@ -662,7 +674,8 @@ class AccountFiscalyearClosingMapping(models.Model):
                 ("account_id", "=", account.id),
                 ("date", ">=", start),
                 ("date", "<=", end),
-            ],
+            ]
+            + self._closing_move_state_domain(),
             ["partner_id", "credit", "debit"],
             ["partner_id"],
         )
